@@ -31,6 +31,9 @@
 
 import isaacgym
 
+import sys
+sys.path.insert(0, '..')
+
 import os
 import hydra
 from omegaconf import DictConfig, OmegaConf
@@ -45,7 +48,7 @@ from rl_games.common import env_configurations, vecenv
 from rl_games.torch_runner import Runner
 
 import yaml
-
+import time
 
 ## OmegaConf & Hydra Config
 
@@ -65,7 +68,8 @@ def launch_rlg_hydra(cfg: DictConfig):
         cfg.checkpoint = to_absolute_path(cfg.checkpoint)
 
     cfg_dict = omegaconf_to_dict(cfg)
-    print_dict(cfg_dict)
+    #print("------------CFG DICT------------")
+    #print_dict(cfg_dict)
 
     # set numpy formatting for printing only
     set_np_formatting()
@@ -93,7 +97,15 @@ def launch_rlg_hydra(cfg: DictConfig):
         'env_creator': lambda **kwargs: create_rlgpu_env(**kwargs),
     })
 
+    cfg.train.params.config.device = cfg.rl_device
+    cfg.train.params.config.network_path = "./nn" + str(cfg.rl_device[-1]) + "/"
+    print("NETWORK PATH = " + str(cfg.train.params.config.network_path))
+
+
     rlg_config_dict = omegaconf_to_dict(cfg.train)
+
+    #print("RLG CONFIG DICT:")
+    #print(rlg_config_dict)
 
     # convert CLI arguments into dictionory
     # create runner and set the settings
@@ -106,11 +118,15 @@ def launch_rlg_hydra(cfg: DictConfig):
     os.makedirs(experiment_dir, exist_ok=True)
     with open(os.path.join(experiment_dir, 'config.yaml'), 'w') as f:
         f.write(OmegaConf.to_yaml(cfg))
-
+    
+    print_dict(cfg_dict)
     runner.run({
         'train': not cfg.test,
         'play': cfg.test,
     })
 
 if __name__ == "__main__":
+    tic = time.perf_counter()
     launch_rlg_hydra()
+    toc = time.perf_counter()
+    print("Time taken = " + str(toc-tic) + "s")

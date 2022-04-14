@@ -35,6 +35,8 @@ params:
 
   config:
     name: ${resolve_default:Cartpole,${....experiment}}
+    network_path: './nn/'
+    device: 'cuda:0'
     full_experiment_name: ${.name}
     env_name: rlgpu
     ppo: True

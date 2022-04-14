@@ -37,6 +37,8 @@ params:
   config:
     name: ${resolve_default:Quadcopter,${....experiment}}
     full_experiment_name: ${.name}
+    network_path: './nn1/'
+    device: 'cuda:1'
     env_name: rlgpu
     ppo: True
     mixed_precision: False
